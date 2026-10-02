@@ -17,6 +17,26 @@
       ],
       "default": "dark"
     },
+    "style": {
+      "type": "string",
+      "enum": [
+        "plain",
+        "minimal",
+        "powerline",
+        "capsule"
+      ],
+      "default": "plain",
+      "description": "plain gaps, minimal rules, powerline arrows or capsule pills"
+    },
+    "icons": {
+      "type": "string",
+      "enum": [
+        "none",
+        "nerd"
+      ],
+      "default": "none",
+      "description": "nerd needs a Nerd Font"
+    },
     "separator": {
       "type": "string",
       "default": "  ",
@@ -58,7 +78,8 @@
             "session",
             "version",
             "custom",
-            "text"
+            "text",
+            "fill"
           ]
         }
       }
@@ -398,6 +419,12 @@
               "default": "muted"
             }
           }
+        },
+        "fill": {
+          "type": "object",
+          "description": "pushes the segments after it to the right edge of the row",
+          "additionalProperties": false,
+          "properties": {}
         }
       }
     }

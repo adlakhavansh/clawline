@@ -3,6 +3,7 @@
 
 import { BY_ID, SEGMENTS } from "./segments/index.mjs";
 import { THEME_NAMES } from "./theme.mjs";
+import { STYLE_NAMES, ICON_SETS } from "./style.mjs";
 
 export function parseValue(raw) {
   if (raw === "true") return true;
@@ -68,6 +69,20 @@ export function applyEdit(config, edit) {
     return `theme ${edit.theme}`;
   }
 
+  if (edit.kind === "style") {
+    if (!STYLE_NAMES.includes(edit.style)) {
+      throw new Error(`unknown style "${edit.style}" (${STYLE_NAMES.join(", ")})`);
+    }
+    config.style = edit.style;
+    return `style ${edit.style}`;
+  }
+
+  if (edit.kind === "icons") {
+    if (!ICON_SETS.includes(edit.icons)) throw new Error(`icons is ${ICON_SETS.join(" or ")}`);
+    config.icons = edit.icons;
+    return `icons ${edit.icons}`;
+  }
+
   if (edit.kind === "set") {
     const { id, option, value } = edit;
     if (!BY_ID.has(id)) throw new Error(`unknown segment "${id}"`);
@@ -98,10 +113,11 @@ export function parseEdits(argv) {
       if (!id || !row) throw new Error("--row needs a segment id and a row number");
       edits.push({ kind: "row", id, row });
       i += 2;
-    } else if (flag === "--theme") {
-      const theme = argv[i + 1];
-      if (!theme) throw new Error("--theme needs a name");
-      edits.push({ kind: "theme", theme });
+    } else if (flag === "--theme" || flag === "--style" || flag === "--icons") {
+      const kind = flag.slice(2);
+      const value = argv[i + 1];
+      if (!value || value.startsWith("--")) throw new Error(`${flag} needs a name`);
+      edits.push({ kind, [kind]: value });
       i += 1;
     } else if (flag === "--set") {
       const spec = argv[i + 1] || "";
@@ -115,7 +131,7 @@ export function parseEdits(argv) {
 }
 
 export const hasEditFlags = (argv) =>
-  argv.some((a) => ["--toggle", "--on", "--off", "--row", "--theme", "--set"].includes(a));
+  argv.some((a) => ["--toggle", "--on", "--off", "--row", "--theme", "--style", "--icons", "--set"].includes(a));
 
 export function describeOptions(id) {
   const segment = BY_ID.get(id);

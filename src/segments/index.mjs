@@ -3,7 +3,7 @@
 import { model, mode, dir, session, version } from "./session.mjs";
 import { context, tokens, rate5h, rateWeek, cost, duration, burn, cache } from "./usage.mjs";
 import { git, pr, diff } from "./repo.mjs";
-import { tips, custom, text } from "./extras.mjs";
+import { tips, custom, text, fillSegment } from "./extras.mjs";
 
 export const SEGMENTS = [
   model,
@@ -25,6 +25,7 @@ export const SEGMENTS = [
   version,
   custom,
   text,
+  fillSegment,
 ];
 
 export const BY_ID = new Map(SEGMENTS.map((s) => [s.id, s]));

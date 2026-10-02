@@ -6,6 +6,7 @@ import { homedir } from "node:os";
 import { join, dirname } from "node:path";
 import { SEGMENTS, BY_ID, defaultRows } from "./segments/index.mjs";
 import { THEMES } from "./theme.mjs";
+import { STYLE_NAMES, ICON_SETS } from "./style.mjs";
 
 export const claudeDir = () => process.env.CLAUDE_CONFIG_DIR || join(homedir(), ".claude");
 export const userConfigPath = () => join(claudeDir(), "clawline.json");
@@ -16,6 +17,8 @@ export function defaults() {
   for (const s of SEGMENTS) segments[s.id] = { ...(s.options || {}) };
   return {
     theme: "dark",
+    style: "plain",
+    icons: "none",
     separator: "  ",
     padding: 0,
     rows: defaultRows(),
@@ -39,6 +42,8 @@ function mergeInto(base, patch, warnings, label) {
     return base;
   }
   if (typeof patch.theme === "string") base.theme = patch.theme;
+  if (typeof patch.style === "string") base.style = patch.style;
+  if (typeof patch.icons === "string") base.icons = patch.icons;
   if (typeof patch.separator === "string") base.separator = patch.separator;
   if (Number.isFinite(patch.padding)) base.padding = patch.padding;
   if (Array.isArray(patch.rows)) {
@@ -58,6 +63,14 @@ export function validate(config) {
   if (!THEMES[config.theme]) {
     warnings.push(`unknown theme "${config.theme}", falling back to dark`);
     config.theme = "dark";
+  }
+  if (!STYLE_NAMES.includes(config.style)) {
+    warnings.push(`unknown style "${config.style}", falling back to plain`);
+    config.style = "plain";
+  }
+  if (!ICON_SETS.includes(config.icons)) {
+    warnings.push(`unknown icons "${config.icons}" (${ICON_SETS.join(", ")}), falling back to none`);
+    config.icons = "none";
   }
   if (!config.rows.length) warnings.push("no rows configured, the status line will be empty");
   for (const row of config.rows) {
@@ -116,6 +129,8 @@ export function serialize(config) {
     theme: config.theme,
     rows: config.rows,
   };
+  if (config.style !== base.style) out.style = config.style;
+  if (config.icons !== base.icons) out.icons = config.icons;
   if (config.separator !== base.separator) out.separator = config.separator;
   if (config.padding !== base.padding) out.padding = config.padding;
 
