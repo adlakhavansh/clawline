@@ -159,7 +159,8 @@ export const custom = {
     let out = "";
     try {
       const c = JSON.parse(readFileSync(file, "utf8"));
-      if (Date.now() - c.at < (cfg.ttl || 30) * 1000) out = c.value;
+      const age = Date.now() - c.at;
+      if (age >= 0 && age < (cfg.ttl || 30) * 1000) out = c.value;
     } catch {}
     if (!out) {
       try {

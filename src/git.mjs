@@ -19,7 +19,9 @@ const cachePath = (cwd) =>
 function readCache(cwd) {
   try {
     const c = JSON.parse(readFileSync(cachePath(cwd), "utf8"));
-    if (Date.now() - c.at < TTL_MS) return c.value;
+    // An entry stamped in the future (a clock that jumped back, a test that faked it) is stale.
+    const age = Date.now() - c.at;
+    if (age >= 0 && age < TTL_MS) return c.value;
   } catch {}
   return null;
 }

@@ -344,3 +344,58 @@ test("render stays under 100ms on a warm cache", () => {
   const ms = Number(process.hrtime.bigint() - started) / 1e6;
   assert.ok(ms < 100, `render took ${ms.toFixed(1)}ms`);
 });
+
+// Renders under a faked clock leave cache entries stamped in the future. Each cache has to
+// treat those as stale, or it serves them until the real clock catches up.
+const fromTheFuture = (fn) => {
+  const real = Date.now;
+  Date.now = () => real() + 100 * 86_400_000;
+  try {
+    return fn();
+  } finally {
+    Date.now = real;
+  }
+};
+
+test("git state cached in the future is read again", async () => {
+  const { execFileSync } = await import("node:child_process");
+  const { mkdtempSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+  const { gitState } = await import("../src/git.mjs");
+  const repo = mkdtempSync(join(tmpdir(), "clawline-git-"));
+  const git = (...args) => execFileSync("git", args, { cwd: repo, stdio: "ignore" });
+  git("init", "-q");
+  git("checkout", "-q", "-b", "before");
+  assert.equal(fromTheFuture(() => gitState(repo)).branch, "before");
+  git("checkout", "-q", "-b", "after");
+  assert.equal(gitState(repo).branch, "after");
+});
+
+test("a custom command cached in the future runs again", async () => {
+  const { writeFileSync, mkdtempSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+  const dir = mkdtempSync(join(tmpdir(), "clawline-custom-"));
+  writeFileSync(join(dir, "out"), "before");
+  const config = { ...defaults(), segments: { ...defaults().segments, custom: { command: "cat out", ttl: 30 } } };
+  const run = () => strip(renderSegment("custom", { data: {}, config, theme: getTheme("dark"), cwd: dir, columns: 80 }));
+  assert.equal(fromTheFuture(run), "before");
+  writeFileSync(join(dir, "out"), "after");
+  assert.equal(run(), "after");
+});
+
+test("a rate sample from the future does not freeze the rate", async () => {
+  const { rates } = await import("../src/state.mjs");
+  const id = `future-${process.pid}-${Date.now()}`;
+  fromTheFuture(() => rates(id, { tokens: 0 }));
+  rates(id, { tokens: 1000 });
+  const real = Date.now;
+  const now = real();
+  Date.now = () => now + 60_000;
+  try {
+    assert.equal(rates(id, { tokens: 7000 }).tokensPerMin, 6000);
+  } finally {
+    Date.now = real;
+  }
+});
