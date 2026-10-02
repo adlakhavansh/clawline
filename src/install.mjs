@@ -1,6 +1,6 @@
 // Patches the `statusLine` key in Claude Code settings and nothing else.
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync, cpSync, rmSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync, cpSync, rmSync, renameSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { claudeDir } from "./config.mjs";
@@ -22,11 +22,15 @@ export const settingsPath = ({ scope = "user", cwd = process.cwd() } = {}) =>
 export const appDir = () => join(claudeDir(), "clawline-app");
 export const fromNpx = (path) => /[\\/]_npx[\\/]/.test(path);
 
+// Copied next to the old one first, so a copy that fails halfway never replaces a working app.
 export function copyApp(from = ROOT, to = appDir()) {
-  rmSync(to, { recursive: true, force: true });
+  const next = `${to}.next`;
+  rmSync(next, { recursive: true, force: true });
   for (const part of ["bin", "src", "data", "package.json"]) {
-    cpSync(join(from, part), join(to, part), { recursive: true });
+    cpSync(join(from, part), join(next, part), { recursive: true });
   }
+  rmSync(to, { recursive: true, force: true });
+  renameSync(next, to);
   return to;
 }
 
@@ -52,9 +56,12 @@ function readSettings(path) {
   }
 }
 
+// Through a rename: an install killed halfway must not leave Claude Code a half-written settings file.
 function writeSettings(path, settings) {
   mkdirSync(dirname(path), { recursive: true });
-  writeFileSync(path, `${JSON.stringify(settings, null, 2)}\n`);
+  const tmp = `${path}.clawline-${process.pid}`;
+  writeFileSync(tmp, `${JSON.stringify(settings, null, 2)}\n`);
+  renameSync(tmp, path);
 }
 
 export function install(config, { scope = "user", cwd = process.cwd() } = {}) {
