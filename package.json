@@ -12,6 +12,8 @@
     "src",
     "data",
     "commands",
+    "plugin",
+    "test/fixtures/mid-session.json",
     "schema.json",
     "README.md",
     "LICENSE"
