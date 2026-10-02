@@ -76,7 +76,7 @@ async function main() {
     return;
   }
 
-  const { hasEditFlags, parseEdits, applyEdit, allOptionLines } = await import("../src/edit.mjs");
+  const { hasEditFlags, parseEdits, applyEdit } = await import("../src/edit.mjs");
   if (hasEditFlags(argv) && !has("--render", "--print")) {
     const { loadConfig, saveConfig } = await import("../src/config.mjs");
     const { install } = await import("../src/install.mjs");
@@ -89,16 +89,56 @@ async function main() {
     return;
   }
 
+  // Machine-readable state, for anything that wants to drive clawline from outside:
+  // the Claude Code pane plugin, an editor extension, a script.
+  if (has("--json")) {
+    const { loadConfig, segmentOptions, userConfigPath } = await import("../src/config.mjs");
+    const { SEGMENTS } = await import("../src/segments/index.mjs");
+    const { THEME_NAMES } = await import("../src/theme.mjs");
+    const { installedEntry } = await import("../src/install.mjs");
+    const { config, warnings, sources } = loadConfig();
+    const rowOf = (id) => {
+      const i = config.rows.findIndex((row) => row.includes(id));
+      return i < 0 ? null : i + 1;
+    };
+    console.log(
+      JSON.stringify(
+        {
+          theme: config.theme,
+          themes: THEME_NAMES,
+          rows: config.rows,
+          configPath: sources[0] || userConfigPath(),
+          installed: Boolean(installedEntry({ scope })),
+          warnings,
+          segments: SEGMENTS.map((s) => ({
+            id: s.id,
+            hint: s.hint,
+            row: rowOf(s.id),
+            options: segmentOptions(config, s.id),
+          })),
+        },
+        null,
+        2,
+      ),
+    );
+    return;
+  }
+
   if (has("--show")) {
     const { loadConfig, serialize, enabledIds } = await import("../src/config.mjs");
     const { config, sources } = loadConfig();
     console.log(sources.length ? `config: ${sources.join(", ")}` : "config: defaults (no file yet)");
     console.log(JSON.stringify(serialize(config), null, 2));
-    console.log("\noptions you can set with --set segment.option=value:");
+    console.log("\noptions you can set with --set segment.option=value (current values):");
+    const { SEGMENTS } = await import("../src/segments/index.mjs");
+    const { segmentOptions } = await import("../src/config.mjs");
     const on = new Set(enabledIds(config));
-    for (const line of allOptionLines()) {
-      const id = line.split(":")[0];
-      console.log(`  ${on.has(id) ? "x" : " "} ${line}`);
+    for (const segment of SEGMENTS) {
+      const opts = Object.entries(segmentOptions(config, segment.id));
+      const body = opts.length
+        ? opts.map(([k, v]) => `${k}=${JSON.stringify(v)}`).join(" ")
+        : "no options";
+      console.log(`  ${on.has(segment.id) ? "x" : " "} ${segment.id}: ${body}`);
     }
     return;
   }
