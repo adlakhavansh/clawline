@@ -1,0 +1,400 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "clawline config",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "theme": {
+      "type": "string",
+      "enum": [
+        "dark",
+        "light",
+        "nord",
+        "mono"
+      ],
+      "default": "dark"
+    },
+    "separator": {
+      "type": "string",
+      "default": "  ",
+      "description": "text between segments"
+    },
+    "padding": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 0
+    },
+    "rows": {
+      "type": "array",
+      "description": "each row is an ordered list of segment ids; a segment not listed is off",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "model",
+            "mode",
+            "context",
+            "tokens",
+            "rate-5h",
+            "rate-week",
+            "cost",
+            "duration",
+            "burn",
+            "diff",
+            "dir",
+            "git",
+            "pr",
+            "cache",
+            "tips",
+            "session",
+            "version",
+            "custom",
+            "text"
+          ]
+        }
+      }
+    },
+    "segments": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "model": {
+          "type": "object",
+          "description": "model name, effort level, fast mode",
+          "additionalProperties": false,
+          "properties": {
+            "showEffort": {
+              "type": "boolean",
+              "default": true
+            },
+            "showId": {
+              "type": "boolean",
+              "default": false
+            },
+            "showThinking": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        },
+        "mode": {
+          "type": "object",
+          "description": "permission mode: plan, auto, accept-edits, bypass",
+          "additionalProperties": false,
+          "properties": {
+            "showOutputStyle": {
+              "type": "boolean",
+              "default": false
+            },
+            "quiet": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        },
+        "context": {
+          "type": "object",
+          "description": "context bar, percent used, exact tokens out of total",
+          "additionalProperties": false,
+          "properties": {
+            "bar": {
+              "type": "boolean",
+              "default": true
+            },
+            "width": {
+              "type": "number",
+              "default": 10
+            },
+            "glyphs": {
+              "type": "string",
+              "default": "blocks"
+            },
+            "showPercent": {
+              "type": "boolean",
+              "default": true
+            },
+            "showTokens": {
+              "type": "boolean",
+              "default": true
+            },
+            "warnAt": {
+              "type": "number",
+              "default": 75
+            },
+            "label": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        },
+        "tokens": {
+          "type": "object",
+          "description": "exact token counts: in/out/cached, or used out of the window",
+          "additionalProperties": false,
+          "properties": {
+            "showCache": {
+              "type": "boolean",
+              "default": true
+            },
+            "style": {
+              "type": "string",
+              "default": "usage"
+            }
+          }
+        },
+        "rate-5h": {
+          "type": "object",
+          "description": "5-hour rate limit used, and time to reset",
+          "additionalProperties": false,
+          "properties": {
+            "showReset": {
+              "type": "boolean",
+              "default": true
+            },
+            "bar": {
+              "type": "boolean",
+              "default": false
+            },
+            "width": {
+              "type": "number",
+              "default": 10
+            },
+            "glyphs": {
+              "type": "string",
+              "default": "blocks"
+            }
+          }
+        },
+        "rate-week": {
+          "type": "object",
+          "description": "7-day rate limit used, and spend limit when one applies",
+          "additionalProperties": false,
+          "properties": {
+            "showReset": {
+              "type": "boolean",
+              "default": true
+            },
+            "includeSpendLimit": {
+              "type": "boolean",
+              "default": true
+            },
+            "bar": {
+              "type": "boolean",
+              "default": false
+            },
+            "width": {
+              "type": "number",
+              "default": 10
+            },
+            "glyphs": {
+              "type": "string",
+              "default": "blocks"
+            }
+          }
+        },
+        "cost": {
+          "type": "object",
+          "description": "estimated session cost in USD",
+          "additionalProperties": false,
+          "properties": {}
+        },
+        "duration": {
+          "type": "object",
+          "description": "session wall-clock time, optionally the share spent waiting on the API",
+          "additionalProperties": false,
+          "properties": {
+            "showApiShare": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        },
+        "burn": {
+          "type": "object",
+          "description": "how fast context is filling, and spend per hour",
+          "additionalProperties": false,
+          "properties": {
+            "showTokens": {
+              "type": "boolean",
+              "default": true
+            },
+            "showSpend": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        },
+        "diff": {
+          "type": "object",
+          "description": "lines added and removed this session",
+          "additionalProperties": false,
+          "properties": {}
+        },
+        "dir": {
+          "type": "object",
+          "description": "working directory, plus worktree name",
+          "additionalProperties": false,
+          "properties": {
+            "style": {
+              "type": "string",
+              "default": "basename"
+            },
+            "showWorktree": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        },
+        "git": {
+          "type": "object",
+          "description": "branch, dirty file count, ahead/behind, conflicts",
+          "additionalProperties": false,
+          "properties": {
+            "showCounts": {
+              "type": "boolean",
+              "default": true
+            },
+            "showAheadBehind": {
+              "type": "boolean",
+              "default": true
+            },
+            "showSha": {
+              "type": "boolean",
+              "default": false
+            },
+            "showConflicts": {
+              "type": "boolean",
+              "default": true
+            },
+            "icon": {
+              "type": "string",
+              "default": ""
+            }
+          }
+        },
+        "pr": {
+          "type": "object",
+          "description": "open pull request or merge request, with review state",
+          "additionalProperties": false,
+          "properties": {
+            "link": {
+              "type": "boolean",
+              "default": true
+            },
+            "showState": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        },
+        "cache": {
+          "type": "object",
+          "description": "prompt cache warm or cold, and hit ratio",
+          "additionalProperties": false,
+          "properties": {
+            "showCause": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        },
+        "tips": {
+          "type": "object",
+          "description": "state-aware nudges, else a rotating Claude Code tip",
+          "additionalProperties": false,
+          "properties": {
+            "contextAware": {
+              "type": "boolean",
+              "default": true
+            },
+            "rotate": {
+              "type": "string",
+              "default": "prompt"
+            },
+            "rotateSeconds": {
+              "type": "number",
+              "default": 30
+            },
+            "file": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "default": null
+            },
+            "maxWidth": {
+              "type": "number",
+              "default": 52
+            },
+            "prefix": {
+              "type": "string",
+              "default": "tip"
+            }
+          }
+        },
+        "session": {
+          "type": "object",
+          "description": "session name or id, and agent name when running one",
+          "additionalProperties": false,
+          "properties": {
+            "showAgent": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        },
+        "version": {
+          "type": "object",
+          "description": "Claude Code version",
+          "additionalProperties": false,
+          "properties": {}
+        },
+        "custom": {
+          "type": "object",
+          "description": "first line of any shell command you configure",
+          "additionalProperties": false,
+          "properties": {
+            "command": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "default": null
+            },
+            "ttl": {
+              "type": "number",
+              "default": 30
+            },
+            "label": {
+              "type": "string",
+              "default": ""
+            },
+            "maxWidth": {
+              "type": "number",
+              "default": 40
+            }
+          }
+        },
+        "text": {
+          "type": "object",
+          "description": "fixed label of your own, handy as a separator or machine name",
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": "string",
+              "default": ""
+            },
+            "role": {
+              "type": "string",
+              "default": "muted"
+            }
+          }
+        }
+      }
+    }
+  }
+}
