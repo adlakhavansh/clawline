@@ -160,3 +160,29 @@ test("malformed settings.json is refused instead of overwritten", async () => {
   assert.throws(() => inst.install(config, { scope: "user" }), /not valid JSON/);
   assert.equal(readFileSync(join(dir, "settings.json"), "utf8"), "{ broken");
 });
+
+test("the render command never goes through npx", async () => {
+  const dir = sandbox();
+  const { install: inst } = await fresh();
+  const npxBin = "/home/u/.npm/_npx/0faab9cd/node_modules/clawline/bin/clawline.mjs";
+  assert.equal(inst.commandString(npxBin), `node "${inst.toPosix(join(dir, "clawline-app", "bin", "clawline.mjs"))}" --render`);
+  assert.equal(inst.commandString("/opt/my tools/clawline/bin/clawline.mjs"), 'node "/opt/my tools/clawline/bin/clawline.mjs" --render', "quoted, so spaces survive");
+  assert.equal(inst.commandString("C:\\Users\\a b\\clawline\\bin\\clawline.mjs"), 'node "C:/Users/a b/clawline/bin/clawline.mjs" --render');
+  assert.ok(inst.fromNpx("C:\\Users\\a\\AppData\\Local\\npm-cache\\_npx\\ab12\\node_modules\\clawline"));
+  assert.ok(!inst.fromNpx("/usr/lib/node_modules/clawline/bin/clawline.mjs"), "a global install is used in place");
+});
+
+test("an npx install copies a working app out of the npm cache", async () => {
+  const { execFileSync } = await import("node:child_process");
+  sandbox();
+  const { install: inst } = await fresh();
+  const to = inst.copyApp();
+  inst.copyApp(); // a second install replaces the copy instead of failing
+  const out = execFileSync("node", [join(to, "bin", "clawline.mjs"), "--render"], {
+    input: readFileSync(new URL("./fixtures/mid-session.json", import.meta.url)),
+    env: { ...process.env, NO_COLOR: "1", COLUMNS: "120" },
+    encoding: "utf8",
+  });
+  assert.match(out, /Opus·xhigh/);
+  assert.equal(out.trim().split("\n").length, 2);
+});

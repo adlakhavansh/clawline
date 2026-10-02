@@ -37,6 +37,9 @@ clawline exists for three things neither does:
 npx clawline            # pick segments, then it installs itself
 ```
 
+npx runs from npm's cache, which gets cleaned, so clawline copies itself to
+`~/.claude/clawline-app` and points the status line there. Run `npx clawline` again to update.
+
 Or from a clone:
 
 ```bash
@@ -240,13 +243,14 @@ Claude Code sets it for you.
   `--doctor` fails loudly if it ever finds a backslash in there.
 - **Speed:** git state is cached in the temp directory for two seconds and the whole render is
   asserted under 100ms in the test suite, because Claude Code cancels a status line that is still
-  running when the next update arrives.
+  running when the next update arrives. That is also why the installed command is plain
+  `node <path>` and never `npx`: npx alone takes 0.5–1.5s per render.
 - **Themes:** `dark`, `light`, `nord`, `mono`. `mono` uses no colour at all beyond bold and dim.
 
 ## Development
 
 ```bash
-node --test test/            # 30 tests, fixtures for fresh, mid-session, post-compact, 1M context
+npm test                     # fixtures for fresh, mid-session, post-compact, 1M context
 node scripts/gen-schema.mjs  # regenerate schema.json from the segment registry
 ```
 
