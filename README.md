@@ -4,6 +4,8 @@ A status line for [Claude Code](https://code.claude.com/docs) that you assemble 
 tick the segments you want in a checkbox list, hit enter. It writes the config, patches
 `settings.json`, and gets out of the way.
 
+![The clawline status line: model, directory, git branch, a context bar and a 5-hour limit bar on the first row; tokens, weekly limit, cost and a tip on the second](https://raw.githubusercontent.com/adlakhavansh/clawline/main/assets/statusline.png)
+
 ```
 Opus 5·xhigh  clawline  master ?12  ctx ██░░░░░░░░ 22%  5h █░░░░░░░░░ 5%
 219k/1.0M  wk 29% 5d18h  $10.8  tip esc esc rewinds the conversation
@@ -100,7 +102,10 @@ Two ways, because Claude Code keybindings map to its own actions (`chat:cycleMod
 `app:toggleTodos`, …) and cannot run a shell command, so no keypress can open the terminal picker.
 
 **The pane.** `plugin/clawline-pane` is a Claude Code plugin that draws the same checkbox list in a
-pane, inside the session. Load it with `claude --plugin-dir <path to>/clawline/plugin`, then run
+pane, inside the session.
+
+![The clawline pane: every segment as a checkbox row with the row it sits in, the two rows summarised below, and theme, reload and close controls](https://raw.githubusercontent.com/adlakhavansh/clawline/main/assets/pane.png)
+ Load it with `claude --plugin-dir <path to>/clawline/plugin`, then run
 `/clawline-pane`. Every segment is a row; pressing one cycles it off, row 1, row 2; the theme
 button cycles themes; reload re-reads the config. It shells out to this CLI, so the config file
 stays the single source of truth.
