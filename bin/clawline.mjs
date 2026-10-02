@@ -21,6 +21,7 @@ const HELP = `clawline — configurable status line for Claude Code
   clawline --doctor        check config, settings, git and node
   clawline --list          list every segment id
   clawline --show          print the current config and each segment's options
+  clawline --pane          how to open the checkbox pane inside Claude Code
 
 edits without a terminal (they save and reinstall straight away):
 
@@ -67,6 +68,19 @@ async function main() {
     if (has("--print") && warnings.length) {
       for (const w of warnings) process.stderr.write(`clawline: ${w}\n`);
     }
+    return;
+  }
+
+  // The pane lives inside Claude Code, not here. Say where it is rather than nothing.
+  if (has("--pane")) {
+    const { fileURLToPath } = await import("node:url");
+    const dir = fileURLToPath(new URL("../plugin", import.meta.url)).replace(/\\/g, "/");
+    console.log("The checkbox pane is a Claude Code plugin, not a terminal command.\n");
+    console.log("  1. start Claude Code with the plugin folder:");
+    console.log(`     claude --plugin-dir ${dir}`);
+    console.log("  2. inside the session, run:");
+    console.log("     /clawline-pane\n");
+    console.log("In a plain terminal, run `clawline` for the same picker without Claude Code.");
     return;
   }
 
