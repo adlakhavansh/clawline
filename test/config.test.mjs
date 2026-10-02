@@ -186,3 +186,13 @@ test("an npx install copies a working app out of the npm cache", async () => {
   assert.match(out, /Opus·xhigh/);
   assert.equal(out.trim().split("\n").length, 2);
 });
+
+test("schema.json matches the segment registry (run node scripts/gen-schema.mjs)", async () => {
+  const { SEGMENTS } = await import("../src/segments/index.mjs");
+  const schema = JSON.parse(readFileSync(new URL("../schema.json", import.meta.url), "utf8"));
+  const listed = schema.properties.segments.properties;
+  assert.deepEqual(Object.keys(listed).sort(), SEGMENTS.map((s) => s.id).sort(), "every segment, no strays");
+  for (const s of SEGMENTS) {
+    assert.deepEqual(Object.keys(listed[s.id].properties).sort(), Object.keys(s.options || {}).sort(), `${s.id} options`);
+  }
+});
