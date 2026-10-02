@@ -1,6 +1,6 @@
 {
   "name": "clawline",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Configurable status line for Claude Code. Pick your segments from a checkbox list, zero dependencies.",
   "type": "module",
   "bin": {
