@@ -108,6 +108,9 @@ export const tips = {
   id: "tips",
   label: "tips",
   hint: "state-aware nudges, else a rotating Claude Code tip",
+  icon: "\u{F0335}",
+  priority: 1,
+  shrinks: 16,
   defaultRow: 2,
   options: {
     contextAware: true,
@@ -148,6 +151,9 @@ export const custom = {
   id: "custom",
   label: "custom",
   hint: "first line of any shell command you configure",
+  icon: "\u{F0AD}",
+  priority: 3,
+  shrinks: 10,
   defaultRow: null,
   options: { command: null, ttl: 30, label: "", maxWidth: 40 },
   sample: (t) => paint(t.muted, "node v20.20.0"),
@@ -185,6 +191,9 @@ export const text = {
   id: "text",
   label: "text",
   hint: "fixed label of your own, handy as a separator or machine name",
+  icon: "",
+  priority: 3,
+  shrinks: 6,
   defaultRow: null,
   options: { value: "", role: "muted" },
   sample: (t) => paint(t.muted, "laptop"),
@@ -192,4 +201,17 @@ export const text = {
     if (!cfg.value) return "";
     return paint(theme[cfg.role] || theme.muted, cfg.value);
   },
+};
+
+// Not drawn: the layout reads it as "everything after me goes to the right edge".
+export const fillSegment = {
+  id: "fill",
+  label: "fill",
+  hint: "pushes the segments after it to the right edge of the row",
+  icon: "",
+  priority: 0,
+  defaultRow: null,
+  options: {},
+  sample: () => "",
+  render: () => "",
 };

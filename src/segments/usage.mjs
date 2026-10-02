@@ -26,6 +26,8 @@ export const context = {
   id: "context",
   label: "context",
   hint: "context bar, percent used, exact tokens out of total",
+  icon: "\u{F035B}",
+  priority: 9,
   defaultRow: 2,
   options: {
     bar: true,
@@ -47,14 +49,14 @@ export const context = {
       const lead = cfg.label ? paint(theme.muted, `${cfg.label} `) : "";
       return cfg.bar
         ? lead +
-            bar(0, { width: cfg.width, glyphs: cfg.glyphs, color: theme.muted }) +
+            bar(0, { width: cfg.width, glyphs: cfg.glyphs, color: theme.muted, track: theme.track }) +
             paint(theme.muted, " —")
         : paint(theme.muted, `${cfg.label || "ctx"} —`);
     }
     const color = loadColor(theme, pct);
     const parts = [];
     if (cfg.label) parts.push(paint(theme.muted, cfg.label));
-    if (cfg.bar) parts.push(bar(pct, { width: cfg.width, glyphs: cfg.glyphs, color }));
+    if (cfg.bar) parts.push(bar(pct, { width: cfg.width, glyphs: cfg.glyphs, color, track: theme.track }));
     if (cfg.showPercent) parts.push(paint(color, `${Math.round(pct)}%`));
     if (cfg.showTokens) {
       parts.push(paint(theme.muted, `${humanTokens(used)}/${humanTokens(size)}`));
@@ -68,6 +70,8 @@ export const tokens = {
   id: "tokens",
   label: "tokens",
   hint: "exact token counts: in/out/cached, or used out of the window",
+  icon: "\u{F0EC}",
+  priority: 4,
   defaultRow: null,
   options: { showCache: true, style: "usage" },
   sample: (t) => paint(t.muted, "in ") + "8.5k" + paint(t.muted, " out ") + "1.2k",
@@ -92,11 +96,14 @@ export const tokens = {
   },
 };
 
-function rateSegment({ id, label, hint, window: key, prefix, defaultRow }) {
+function rateSegment({ id, label, hint, window: key, prefix, defaultRow, icon, priority }) {
   return {
     id,
     label,
     hint,
+    icon,
+    priority,
+    shrinks: 8, // "wk 91%" leads, so a cut keeps the number
     defaultRow,
     options: { showReset: true, bar: false, width: 10, glyphs: "blocks" },
     sample: (t) => paint(t.muted, `${prefix} `) + paint(loadColor(t, 24), "24%") + paint(t.muted, " 2h11m"),
@@ -106,7 +113,7 @@ function rateSegment({ id, label, hint, window: key, prefix, defaultRow }) {
       const pct = Math.round(w.used_percentage);
       const color = loadColor(theme, pct);
       let out = paint(theme.muted, `${prefix} `);
-      if (cfg.bar) out += `${bar(pct, { width: cfg.width, glyphs: cfg.glyphs, color })} `;
+      if (cfg.bar) out += `${bar(pct, { width: cfg.width, glyphs: cfg.glyphs, color, track: theme.track })} `;
       out += paint(color, `${pct}%`);
       if (cfg.showReset) {
         const left = untilEpoch(w.resets_at);
@@ -123,6 +130,8 @@ export const rate5h = rateSegment({
   hint: "5-hour rate limit used, and time to reset",
   window: "five_hour",
   prefix: "5h",
+  icon: "\u{F051F}",
+  priority: 8,
   defaultRow: 2,
 });
 
@@ -134,6 +143,8 @@ export const rateWeek = {
     window: "seven_day",
     prefix: "wk",
     defaultRow: 2,
+    icon: "\u{F00ED}",
+    priority: 7,
   }),
   options: { showReset: true, includeSpendLimit: true, bar: false, width: 10, glyphs: "blocks" },
   render({ data, cfg, theme }) {
@@ -143,7 +154,7 @@ export const rateWeek = {
       const pct = Math.round(w.used_percentage);
       const color = loadColor(theme, pct);
       let out = paint(theme.muted, "wk ");
-      if (cfg.bar) out += `${bar(pct, { width: cfg.width, glyphs: cfg.glyphs, color })} `;
+      if (cfg.bar) out += `${bar(pct, { width: cfg.width, glyphs: cfg.glyphs, color, track: theme.track })} `;
       out += paint(color, `${pct}%`);
       if (cfg.showReset) {
         const left = untilEpoch(w.resets_at);
@@ -164,6 +175,8 @@ export const cost = {
   id: "cost",
   label: "cost",
   hint: "estimated session cost in USD",
+  icon: "\u{F155}",
+  priority: 6,
   defaultRow: 2,
   options: {},
   sample: (t) => paint(t.cost, "$1.23"),
@@ -178,6 +191,8 @@ export const duration = {
   id: "duration",
   label: "duration",
   hint: "session wall-clock time, optionally the share spent waiting on the API",
+  icon: "\u{F017}",
+  priority: 2,
   defaultRow: null,
   options: { showApiShare: false },
   sample: (t) => paint(t.muted, "1h03m"),
@@ -197,6 +212,8 @@ export const burn = {
   id: "burn",
   label: "burn",
   hint: "how fast context is filling, and spend per hour",
+  icon: "\u{F0238}",
+  priority: 3,
   defaultRow: null,
   options: { showTokens: true, showSpend: true },
   sample: (t) => paint(t.warn, "+12k/min") + paint(t.muted, " $0.9/h"),
@@ -223,6 +240,8 @@ export const cache = {
   id: "cache",
   label: "cache",
   hint: "prompt cache warm or cold, and hit ratio",
+  icon: "\u{F01BC}",
+  priority: 4,
   defaultRow: null,
   options: { showCause: false },
   sample: (t) => paint(t.muted, "cache ") + paint(t.good, "91%"),

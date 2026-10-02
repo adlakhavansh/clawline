@@ -1,4 +1,5 @@
 // Themes map semantic roles to SGR colour codes. Segments never hardcode a colour.
+// `bg`, `track` and `ink` are only read by the powerline and capsule styles and the smooth bar.
 
 const base = {
   sep: "90",
@@ -10,6 +11,9 @@ const base = {
 export const THEMES = {
   dark: {
     ...base,
+    bg: { base: "48;5;236", alt: "48;5;238", accent: "48;5;117" },
+    track: "48;5;237",
+    ink: "38;5;234",
     model: "38;5;117",
     mode: "38;5;141",
     dir: "1;38;5;252",
@@ -26,6 +30,9 @@ export const THEMES = {
   },
   light: {
     ...base,
+    bg: { base: "48;5;254", alt: "48;5;252", accent: "48;5;25" },
+    track: "48;5;253",
+    ink: "38;5;231",
     sep: "37",
     muted: "37",
     model: "38;5;25",
@@ -44,6 +51,9 @@ export const THEMES = {
   },
   nord: {
     ...base,
+    bg: { base: "48;5;237", alt: "48;5;239", accent: "48;5;110" },
+    track: "48;5;238",
+    ink: "38;5;235",
     model: "38;5;110",
     mode: "38;5;139",
     dir: "1;38;5;253",
@@ -60,6 +70,9 @@ export const THEMES = {
   },
   mono: {
     ...base,
+    bg: { base: "7", alt: "7", accent: "7" },
+    track: "",
+    ink: "",
     model: "1",
     mode: "90",
     dir: "1",
