@@ -244,6 +244,10 @@ Claude Code sets it for you.
 - **Windows:** Claude Code runs the status line through Git Bash when it is installed, and Git Bash
   eats unquoted backslashes in the command path. The installer always writes forward slashes.
   `--doctor` fails loudly if it ever finds a backslash in there.
+- **Text from the session:** the session JSON carries strings that people and repos choose: a
+  session name, a folder, a branch, a PR. Control characters are stripped from every one of them
+  before anything is drawn, so none can clear the screen, move the cursor or open a link, and a
+  field of the wrong type is ignored rather than printed as `NaN` or `[object Object]`.
 - **Speed:** git state is cached in the temp directory for two seconds and the whole render is
   asserted under 100ms in the test suite, because Claude Code cancels a status line that is still
   running when the next update arrives. That is also why the installed command is plain
@@ -254,6 +258,7 @@ Claude Code sets it for you.
 
 ```bash
 npm test                     # fixtures for fresh, mid-session, post-compact, 1M context
+                             # also fails when schema.json is behind the segment options
 node scripts/gen-schema.mjs  # regenerate schema.json from the segment registry
 ```
 
