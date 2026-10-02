@@ -1,0 +1,42 @@
+{
+  "name": "clawline",
+  "version": "0.1.0",
+  "description": "Configurable status line for Claude Code. Pick your segments from a checkbox list, zero dependencies.",
+  "type": "module",
+  "bin": {
+    "clawline": "bin/clawline.mjs"
+  },
+  "main": "src/render.mjs",
+  "files": [
+    "bin",
+    "src",
+    "data",
+    "commands",
+    "schema.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test test/",
+    "render": "node bin/clawline.mjs --render",
+    "schema": "node scripts/gen-schema.mjs"
+  },
+  "keywords": [
+    "claude",
+    "claude-code",
+    "statusline",
+    "status-line",
+    "cli",
+    "terminal"
+  ],
+  "license": "MIT",
+  "author": "adlakhavansh",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adlakhavansh/clawline.git"
+  },
+  "homepage": "https://github.com/adlakhavansh/clawline#readme"
+}
