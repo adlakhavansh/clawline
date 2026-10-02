@@ -38,6 +38,9 @@ async function loadView($: EngineInterface, status: string): Promise<PaneView> {
     return {
       theme: 'dark',
       themes: [],
+      style: 'plain',
+      styles: [],
+      icons: 'none',
       segments: [],
       status: `clawline not reachable: ${ran.stderr.split('\n')[0] || 'unknown error'}`,
     }
@@ -45,11 +48,18 @@ async function loadView($: EngineInterface, status: string): Promise<PaneView> {
   const parsed = JSON.parse(ran.stdout) as {
     theme: string
     themes: string[]
+    style?: string
+    styles?: string[]
+    icons?: string
     segments: { id: string; hint: string; row: number | null }[]
   }
   return {
     theme: parsed.theme,
     themes: parsed.themes,
+    // An older clawline on PATH has no styles; the pane then hides those two controls.
+    style: parsed.style ?? 'plain',
+    styles: parsed.styles ?? [],
+    icons: parsed.icons ?? 'none',
     segments: parsed.segments.map(s => ({ id: s.id, hint: s.hint, row: s.row })),
     status,
   }
@@ -73,11 +83,17 @@ async function cycle($: EngineInterface, segment: PaneSegment): Promise<void> {
   await refresh($, ran.ok ? step.said : `failed: ${ran.stderr.split('\n')[0]}`)
 }
 
-async function cycleTheme($: EngineInterface, current: PaneView): Promise<void> {
-  const themes = current.themes.length ? current.themes : ['dark']
-  const wanted = themes[(themes.indexOf(current.theme) + 1) % themes.length]
-  const ran = await runClawline($, ['--theme', wanted])
-  await refresh($, ran.ok ? `theme ${wanted}` : `theme failed: ${ran.stderr.split('\n')[0]}`)
+// Theme, style and icons all cycle the same way: the next name in the list, sent as a flag.
+async function cycleSetting(
+  $: EngineInterface,
+  name: 'theme' | 'style' | 'icons',
+  names: readonly string[],
+  current: string,
+): Promise<void> {
+  const list = names.length ? names : [current]
+  const wanted = list[(list.indexOf(current) + 1) % list.length]
+  const ran = await runClawline($, [`--${name}`, wanted])
+  await refresh($, ran.ok ? `${name} ${wanted}` : `${name} failed: ${ran.stderr.split('\n')[0]}`)
 }
 
 export const register: Register = on => {
@@ -147,8 +163,26 @@ export const register: Register = on => {
             key="theme"
             plain
             label={`theme: ${current.theme}`}
-            onPress={() => void cycleTheme($, current)}
+            onPress={() => void cycleSetting($, 'theme', current.themes, current.theme)}
           />
+          {current.styles.length ? (
+            <>
+              <Text dimColor>   </Text>
+              <Button
+                key="style"
+                plain
+                label={`style: ${current.style}`}
+                onPress={() => void cycleSetting($, 'style', current.styles, current.style)}
+              />
+              <Text dimColor>   </Text>
+              <Button
+                key="icons"
+                plain
+                label={`icons: ${current.icons}`}
+                onPress={() => void cycleSetting($, 'icons', ['none', 'nerd'], current.icons)}
+              />
+            </>
+          ) : null}
           <Text dimColor>   </Text>
           <Button key="refresh" plain label="reload" onPress={() => void refresh($, 'reloaded')} />
           <Text dimColor>   </Text>

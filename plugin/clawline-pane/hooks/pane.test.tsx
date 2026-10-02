@@ -6,6 +6,9 @@ const PANE = 'clawline'
 const VIEW = {
   theme: 'dark',
   themes: ['dark', 'light', 'nord', 'mono'],
+  style: 'plain',
+  styles: ['plain', 'minimal', 'powerline', 'capsule'],
+  icons: 'none',
   rows: [['model'], ['context']],
   configPath: '/tmp/clawline.json',
   installed: true,
@@ -108,6 +111,20 @@ for (const surface of ['terminal', 'desktop'] as const) {
     await withPane($, surface, async pane => {
       await pane.press({ key: 'theme' })
       expect(seen.map(argv => argv.join(' ')).some(line => line.includes('--theme light'))).toBe(true)
+    })
+  })
+
+  test(`${surface}: the style and icons controls cycle to the next value`, async ($, on) => {
+    const seen: string[][] = []
+    bottom(on, seen)
+
+    await withPane($, surface, async pane => {
+      expect((await pane.find({ key: 'style' }))?.text).toContain('plain')
+      await pane.press({ key: 'style' })
+      await pane.press({ key: 'icons' })
+      const sent = seen.map(argv => argv.join(' '))
+      expect(sent.some(line => line.includes('--style minimal'))).toBe(true)
+      expect(sent.some(line => line.includes('--icons nerd'))).toBe(true)
     })
   })
 

@@ -8,6 +8,10 @@ export type PaneSegment = {
 export type PaneView = {
   theme: string
   themes: string[]
+  style: string
+  /** Empty when the clawline on PATH predates styles. */
+  styles: string[]
+  icons: string
   segments: PaneSegment[]
   /** Last line of feedback: what changed, or what went wrong. */
   status: string
