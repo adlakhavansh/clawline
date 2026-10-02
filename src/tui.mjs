@@ -6,6 +6,8 @@ import { getTheme, THEME_NAMES } from "./theme.mjs";
 import { SEGMENTS, BY_ID } from "./segments/index.mjs";
 import { loadConfig, saveConfig } from "./config.mjs";
 import { install, commandString } from "./install.mjs";
+import { layout, FILL, STYLE_NAMES } from "./style.mjs";
+import { withIcon } from "./render.mjs";
 
 const ALT_ON = "\u001b[?1049h";
 const ALT_OFF = "\u001b[?1049l";
@@ -43,30 +45,33 @@ function move(rows, id, delta) {
   [row[i], row[j]] = [row[j], row[i]];
 }
 
-function previewLines(rows, themeName, columns) {
-  const theme = getTheme(themeName);
-  const sep = paint(theme.sep, "  ");
+// The preview goes through the same layout as the real line, so style, icons and fill show.
+function previewLines(rows, look, columns) {
+  const theme = getTheme(look.theme);
   return rows
-    .map((row) =>
-      row
+    .map((row) => {
+      const items = row
         .map((id) => {
+          if (id === FILL) return { id };
           const s = BY_ID.get(id);
-          if (!s) return "";
+          if (!s) return null;
+          let text;
           try {
-            return s.sample(theme);
+            text = s.sample(theme);
           } catch {
-            return id;
+            text = id;
           }
+          return text ? { id, text: withIcon(id, text, look), priority: s.priority, shrinks: s.shrinks } : null;
         })
-        .filter(Boolean)
-        .join(sep),
-    )
-    .filter(Boolean)
-    .map((line) => truncate(line, columns - 4));
+        .filter(Boolean);
+      if (!items.some((i) => i.id !== FILL)) return "";
+      return layout(items, { style: look.style, theme, config: look, columns: columns - 4 });
+    })
+    .filter(Boolean);
 }
 
 function draw(state) {
-  const { rows, themeName, cursor, scope } = state;
+  const { rows, themeName, style, icons, cursor, scope } = state;
   const theme = getTheme(themeName);
   const columns = process.stdout.columns || 100;
   const lines = [];
@@ -74,7 +79,7 @@ function draw(state) {
   lines.push(
     paint("1", "clawline") +
       paint(theme.muted, "  pick your segments") +
-      paint(theme.muted, `   theme ${themeName} · rows ${rows.length} · ${scope} config`),
+      paint(theme.muted, `   theme ${themeName} · style ${style} · icons ${icons} · rows ${rows.length} · ${scope} config`),
   );
   lines.push("");
 
@@ -98,14 +103,14 @@ function draw(state) {
 
   lines.push("");
   lines.push(paint(theme.muted, "preview"));
-  const preview = previewLines(rows, themeName, columns);
+  const preview = previewLines(rows, { theme: themeName, style, icons, separator: state.separator }, columns);
   if (preview.length) lines.push(...preview.map((l) => `  ${l}`));
   else lines.push(paint(theme.muted, "  (nothing enabled)"));
   lines.push("");
   lines.push(
     paint(
       theme.muted,
-      "space toggle · 1/2 row · J/K reorder · t theme · r rows · s scope · enter save · q quit",
+      "space toggle · 1/2 row · J/K reorder · t theme · y style · i icons · r rows · s scope · enter save · q quit",
     ),
   );
 
@@ -133,6 +138,9 @@ export async function runPicker({ scope = "user", cwd = process.cwd() } = {}) {
   const state = {
     rows: (config.rows.length ? config.rows : [[], []]).map((r) => r.filter((id) => BY_ID.has(id))),
     themeName: config.theme,
+    style: config.style,
+    icons: config.icons,
+    separator: config.separator,
     cursor: 0,
     scope,
   };
@@ -160,6 +168,8 @@ export async function runPicker({ scope = "user", cwd = process.cwd() } = {}) {
     }
     config.rows = state.rows.filter((r) => r.length);
     config.theme = state.themeName;
+    config.style = state.style;
+    config.icons = state.icons;
     const configPath = saveConfig(config, { scope: state.scope, cwd });
     const res = install(config, { scope: state.scope, cwd });
     const theme = getTheme(config.theme);
@@ -172,7 +182,7 @@ export async function runPicker({ scope = "user", cwd = process.cwd() } = {}) {
       console.log(`  replaced ${res.before.command}`);
     }
     console.log("");
-    for (const line of previewLines(config.rows, config.theme, process.stdout.columns || 100)) {
+    for (const line of previewLines(config.rows, config, process.stdout.columns || 100)) {
       console.log(`  ${line}`);
     }
     console.log("");
@@ -221,6 +231,12 @@ export async function runPicker({ scope = "user", cwd = process.cwd() } = {}) {
           state.themeName = THEME_NAMES[(i + 1) % THEME_NAMES.length];
           break;
         }
+        case "y":
+          state.style = STYLE_NAMES[(STYLE_NAMES.indexOf(state.style) + 1) % STYLE_NAMES.length];
+          break;
+        case "i":
+          state.icons = state.icons === "nerd" ? "none" : "nerd";
+          break;
         case "r":
           if (state.rows.length > 1 && !state.rows[1].length) state.rows = [state.rows[0]];
           else if (state.rows.length === 1) state.rows.push([]);

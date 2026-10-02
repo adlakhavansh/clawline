@@ -76,11 +76,26 @@ export const GLYPHS = {
   bars: { full: "▬", empty: "─" },
   dots: { full: "●", empty: "○" },
   ascii: { full: "#", empty: "." },
+  smooth: { full: "█", empty: "░", partial: " ▏▎▍▌▋▊▉" },
 };
 
-export function bar(pct, { width: w = 10, glyphs = "blocks", color = "" } = {}) {
+export function bar(pct, { width = 10, glyphs = "blocks", color = "", track = "" } = {}) {
+  // A width from a hand-edited config can be anything; a bar is 1 to 200 cells.
+  const w = Math.max(1, Math.min(200, Math.round(Number(width)) || 10));
   const g = GLYPHS[glyphs] || GLYPHS.blocks;
   const safe = Math.max(0, Math.min(100, Number(pct) || 0));
+  if (g.partial) {
+    // Eighth blocks over a track colour: 38% of ten cells is three full cells and a sliver.
+    const eighths = Math.round((safe / 100) * w * 8);
+    const full = Math.floor(eighths / 8);
+    const sliver = eighths % 8;
+    const rest = w - full - (sliver ? 1 : 0);
+    let out = full ? paint(color, g.full.repeat(full)) : "";
+    if (sliver) out += paint([color, track].filter(Boolean).join(";"), g.partial[sliver]);
+    // Without a track colour the empty cells would be invisible, so they fall back to a shade.
+    if (rest > 0) out += track && colorEnabled() ? paint(track, " ".repeat(rest)) : paint("90", g.empty.repeat(rest));
+    return out;
+  }
   const filled = Math.max(0, Math.min(w, Math.round((safe / 100) * w)));
   const head = filled ? paint(color, g.full.repeat(filled)) : "";
   const tail = w - filled > 0 ? paint("90", g.empty.repeat(w - filled)) : "";

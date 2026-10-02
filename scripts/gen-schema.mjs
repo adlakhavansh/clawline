@@ -3,6 +3,7 @@ import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { SEGMENTS } from "../src/segments/index.mjs";
 import { THEME_NAMES } from "../src/theme.mjs";
+import { STYLE_NAMES, ICON_SETS } from "../src/style.mjs";
 
 const segments = {};
 for (const s of SEGMENTS) {
@@ -27,6 +28,13 @@ const schema = {
   properties: {
     $schema: { type: "string" },
     theme: { type: "string", enum: THEME_NAMES, default: "dark" },
+    style: {
+      type: "string",
+      enum: STYLE_NAMES,
+      default: "plain",
+      description: "plain gaps, minimal rules, powerline arrows or capsule pills",
+    },
+    icons: { type: "string", enum: ICON_SETS, default: "none", description: "nerd needs a Nerd Font" },
     separator: { type: "string", default: "  ", description: "text between segments" },
     padding: { type: "integer", minimum: 0, default: 0 },
     rows: {

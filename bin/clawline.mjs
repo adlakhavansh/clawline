@@ -29,10 +29,12 @@ edits without a terminal (they save and reinstall straight away):
   clawline --on burn --off cost    turn specific segments on or off
   clawline --row tips 1            move a segment to row 1
   clawline --theme nord            switch theme
+  clawline --style minimal         plain, minimal, powerline or capsule
+  clawline --icons nerd            Nerd Font icons, or none
   clawline --set context.width=16  set one segment option
 
   --project                act on ./.claude/settings.json and ./.clawline.json
-  --theme <name>           with --render or --print, overrides the theme for that run only
+  --theme, --style, --icons  with --render or --print, override the config for that run only
 `;
 
 async function main() {
@@ -61,8 +63,10 @@ async function main() {
 
     const cwd = data.workspace?.current_dir || data.cwd || process.cwd();
     const { config, warnings } = loadConfig(cwd);
-    const themeOverride = valueOf("--theme");
-    if (themeOverride) config.theme = themeOverride;
+    for (const key of ["theme", "style", "icons"]) {
+      const override = valueOf(`--${key}`);
+      if (override) config[key] = override;
+    }
 
     for (const line of render(data, { config })) console.log(line);
     if (has("--print") && warnings.length) {
@@ -109,6 +113,7 @@ async function main() {
     const { loadConfig, segmentOptions, userConfigPath } = await import("../src/config.mjs");
     const { SEGMENTS } = await import("../src/segments/index.mjs");
     const { THEME_NAMES } = await import("../src/theme.mjs");
+    const { STYLE_NAMES } = await import("../src/style.mjs");
     const { installedEntry } = await import("../src/install.mjs");
     const { config, warnings, sources } = loadConfig();
     const rowOf = (id) => {
@@ -120,6 +125,9 @@ async function main() {
         {
           theme: config.theme,
           themes: THEME_NAMES,
+          style: config.style,
+          styles: STYLE_NAMES,
+          icons: config.icons,
           rows: config.rows,
           configPath: sources[0] || userConfigPath(),
           installed: Boolean(installedEntry({ scope })),
