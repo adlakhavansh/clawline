@@ -1,12 +1,13 @@
 // Per-session scratch state in the temp dir, used for rates that need two samples.
 
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync, renameSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 const MIN_GAP_MS = 5000;
+// The id only ever names a file in the temp dir: anything that could climb out of it is replaced.
 const statePath = (sessionId) =>
-  join(tmpdir(), `clawline-state-${String(sessionId || "nosession").slice(0, 40)}.json`);
+  join(tmpdir(), `clawline-state-${String(sessionId || "nosession").replace(/[^\w.-]/g, "_").slice(0, 64)}.json`);
 
 function read(sessionId) {
   try {
@@ -18,7 +19,10 @@ function read(sessionId) {
 
 function write(sessionId, value) {
   try {
-    writeFileSync(statePath(sessionId), JSON.stringify(value));
+    // A status line is killed when the next update arrives; a rename means never half a file.
+    const path = statePath(sessionId);
+    writeFileSync(`${path}.${process.pid}`, JSON.stringify(value));
+    renameSync(`${path}.${process.pid}`, path);
   } catch {}
 }
 
@@ -26,7 +30,9 @@ function write(sessionId, value) {
 // spend falls back to the session totals, which are always available.
 export function rates(sessionId, { tokens = 0, costUsd = 0, durationMs = 0 } = {}) {
   const now = Date.now();
-  const prev = read(sessionId);
+  let prev = read(sessionId);
+  // A sample from the future would freeze the rate until the clock caught up with it.
+  if (prev && !(prev.at <= now && Number.isFinite(prev.tokens))) prev = null;
   let tokensPerMin = prev?.rate?.tokensPerMin ?? null;
 
   if (prev && now - prev.at >= MIN_GAP_MS) {

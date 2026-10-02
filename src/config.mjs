@@ -68,6 +68,11 @@ export function validate(config) {
   for (const id of Object.keys(config.segments)) {
     if (!BY_ID.has(id)) warnings.push(`options for unknown segment "${id}" (ignored)`);
   }
+  // Negative padding would make the line wider than the terminal.
+  if (!(config.padding >= 0)) {
+    warnings.push(`padding ${config.padding} is below 0, using 0`);
+    config.padding = 0;
+  }
   return warnings;
 }
 
@@ -80,7 +85,19 @@ export function loadConfig(cwd = process.cwd()) {
     [userConfigPath(), "user config"],
     [projectConfigPath(cwd), "project config"],
   ]) {
-    const raw = readJson(path);
+    let raw = readJson(path);
+    // A .clawline.json arrives with whatever repo you clone, and custom.command runs through a
+    // shell on every render. Only your own config can set it, unless that config says
+    // "allowProjectCommands": true.
+    if (raw && !raw.__error && label === "user config") config.allowProjectCommands = raw.allowProjectCommands === true;
+    const custom = raw?.segments?.custom;
+    if (custom && typeof custom === "object" && "command" in custom && label === "project config" && !config.allowProjectCommands) {
+      raw = structuredClone(raw);
+      delete raw.segments.custom.command;
+      warnings.push(
+        `${path} sets custom.command, which a project config may not do; set "allowProjectCommands": true in ${userConfigPath()} to allow it`,
+      );
+    }
     if (raw) {
       mergeInto(config, raw, warnings, label);
       if (!raw.__error) sources.push(path);
@@ -112,6 +129,7 @@ export function serialize(config) {
     if (Object.keys(changed).length) segments[id] = changed;
   }
   if (Object.keys(segments).length) out.segments = segments;
+  if (config.allowProjectCommands) out.allowProjectCommands = true;
   return out;
 }
 

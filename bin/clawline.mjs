@@ -49,12 +49,13 @@ async function main() {
   if (has("--render") || has("--print")) {
     const { render, readStdin } = await import("../src/render.mjs");
     const { loadConfig } = await import("../src/config.mjs");
+    const { cleanPayload } = await import("../src/payload.mjs");
 
     const file = has("--print") ? valueOf("--print") : undefined;
     const raw = file && !file.startsWith("--") ? readFileSync(file, "utf8") : readStdin();
     let data = {};
     try {
-      data = JSON.parse(raw || "{}");
+      data = cleanPayload(JSON.parse(raw || "{}"));
     } catch {
       data = {};
     }

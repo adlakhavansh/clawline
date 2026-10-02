@@ -37,6 +37,9 @@ clawline exists for three things neither does:
 npx clawline            # pick segments, then it installs itself
 ```
 
+npx runs from npm's cache, which gets cleaned, so clawline copies itself to
+`~/.claude/clawline-app` and points the status line there. Run `npx clawline` again to update.
+
 Or from a clone:
 
 ```bash
@@ -203,8 +206,11 @@ Per-segment options worth knowing:
 - `custom`: `command`, `ttl` seconds, `label`, `maxWidth`
 - `duration`: `showApiShare`
 
-`custom.command` runs through a shell, by design, so pipes and globs work. It is your own config
-file; nothing from the session payload is ever interpolated into it.
+`custom.command` runs through a shell, by design, so pipes and globs work. Nothing from the session
+payload is ever interpolated into it. Because it runs on every render, only your own
+`~/.claude/clawline.json` may set it: a project's `.clawline.json` comes with whatever repo you
+clone, so a command there is ignored with a warning in `--doctor`, unless your user config says
+`"allowProjectCommands": true`.
 
 ## CLI
 
@@ -238,15 +244,21 @@ Claude Code sets it for you.
 - **Windows:** Claude Code runs the status line through Git Bash when it is installed, and Git Bash
   eats unquoted backslashes in the command path. The installer always writes forward slashes.
   `--doctor` fails loudly if it ever finds a backslash in there.
+- **Text from the session:** the session JSON carries strings that people and repos choose: a
+  session name, a folder, a branch, a PR. Control characters are stripped from every one of them
+  before anything is drawn, so none can clear the screen, move the cursor or open a link, and a
+  field of the wrong type is ignored rather than printed as `NaN` or `[object Object]`.
 - **Speed:** git state is cached in the temp directory for two seconds and the whole render is
   asserted under 100ms in the test suite, because Claude Code cancels a status line that is still
-  running when the next update arrives.
+  running when the next update arrives. That is also why the installed command is plain
+  `node <path>` and never `npx`: npx alone takes 0.5–1.5s per render.
 - **Themes:** `dark`, `light`, `nord`, `mono`. `mono` uses no colour at all beyond bold and dim.
 
 ## Development
 
 ```bash
-node --test test/            # 30 tests, fixtures for fresh, mid-session, post-compact, 1M context
+npm test                     # fixtures for fresh, mid-session, post-compact, 1M context
+                             # also fails when schema.json is behind the segment options
 node scripts/gen-schema.mjs  # regenerate schema.json from the segment registry
 ```
 
