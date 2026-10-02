@@ -22,7 +22,7 @@
     "node": ">=18"
   },
   "scripts": {
-    "test": "node --test test/",
+    "test": "node --test",
     "render": "node bin/clawline.mjs --render",
     "schema": "node scripts/gen-schema.mjs"
   },
