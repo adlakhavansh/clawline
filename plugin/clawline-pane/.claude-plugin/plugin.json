@@ -1,0 +1,9 @@
+{
+  "name": "clawline-pane",
+  "version": "0.1.0",
+  "description": "Toggle clawline status line segments from a checkbox pane inside Claude Code",
+  "types": "./types/index.d.ts",
+  "author": {
+    "name": "adlakhavansh"
+  }
+}
