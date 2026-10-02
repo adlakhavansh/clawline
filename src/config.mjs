@@ -68,6 +68,11 @@ export function validate(config) {
   for (const id of Object.keys(config.segments)) {
     if (!BY_ID.has(id)) warnings.push(`options for unknown segment "${id}" (ignored)`);
   }
+  // Negative padding would make the line wider than the terminal.
+  if (!(config.padding >= 0)) {
+    warnings.push(`padding ${config.padding} is below 0, using 0`);
+    config.padding = 0;
+  }
   return warnings;
 }
 
@@ -85,7 +90,8 @@ export function loadConfig(cwd = process.cwd()) {
     // shell on every render. Only your own config can set it, unless that config says
     // "allowProjectCommands": true.
     if (raw && !raw.__error && label === "user config") config.allowProjectCommands = raw.allowProjectCommands === true;
-    if (raw?.segments?.custom && "command" in raw.segments.custom && label === "project config" && !config.allowProjectCommands) {
+    const custom = raw?.segments?.custom;
+    if (custom && typeof custom === "object" && "command" in custom && label === "project config" && !config.allowProjectCommands) {
       raw = structuredClone(raw);
       delete raw.segments.custom.command;
       warnings.push(

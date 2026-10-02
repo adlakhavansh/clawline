@@ -34,9 +34,12 @@ export function copyApp(from = ROOT, to = appDir()) {
   return to;
 }
 
-export function commandString(bin = BIN) {
-  const target = fromNpx(bin) ? join(appDir(), "bin", "clawline.mjs") : bin;
-  return `node "${toPosix(target)}" --render`;
+// Quoted for the shell Claude Code runs it through. Outside Windows, a path holding $, ` or "
+// is escaped too, or the shell would expand it.
+export function commandString(bin = BIN, platform = process.platform) {
+  const target = toPosix(fromNpx(bin) ? join(appDir(), "bin", "clawline.mjs") : bin);
+  const quoted = platform === "win32" ? target : target.replace(/(["$`\\])/g, "\\$1");
+  return `node "${quoted}" --render`;
 }
 
 export function statusLineEntry(config) {
@@ -48,20 +51,32 @@ export function statusLineEntry(config) {
 }
 
 function readSettings(path) {
+  let settings;
   try {
-    return JSON.parse(readFileSync(path, "utf8"));
+    settings = JSON.parse(readFileSync(path, "utf8"));
   } catch (err) {
     if (err?.code === "ENOENT") return {};
     throw new Error(`${path} is not valid JSON (${err.message}) — fix it before installing`);
   }
+  if (!settings || typeof settings !== "object" || Array.isArray(settings)) {
+    throw new Error(`${path} is not a JSON object — fix it before installing`);
+  }
+  return settings;
 }
 
 // Through a rename: an install killed halfway must not leave Claude Code a half-written settings file.
 function writeSettings(path, settings) {
   mkdirSync(dirname(path), { recursive: true });
   const tmp = `${path}.clawline-${process.pid}`;
-  writeFileSync(tmp, `${JSON.stringify(settings, null, 2)}\n`);
-  renameSync(tmp, path);
+  const body = `${JSON.stringify(settings, null, 2)}\n`;
+  writeFileSync(tmp, body);
+  try {
+    renameSync(tmp, path);
+  } catch {
+    // Windows refuses to rename over a file another process has open; write it in place then.
+    writeFileSync(path, body);
+    rmSync(tmp, { force: true });
+  }
 }
 
 export function install(config, { scope = "user", cwd = process.cwd() } = {}) {
