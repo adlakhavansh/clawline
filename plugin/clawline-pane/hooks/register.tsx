@@ -151,6 +151,8 @@ export const register: Register = on => {
           />
           <Text dimColor>   </Text>
           <Button key="refresh" plain label="reload" onPress={() => void refresh($, 'reloaded')} />
+          <Text dimColor>   </Text>
+          <Button key="close" plain label="close" onPress={() => void $.ui.close({ id: PANE }).catch(() => {})} />
         </Box>
         <Text dimColor>{current.status}</Text>
       </Box>
