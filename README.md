@@ -80,6 +80,8 @@ space toggle · 1/2 row · J/K reorder · t theme · r rows · s scope · enter 
 | `tab` | send it to the other row |
 | `J` `K` | reorder it within its row |
 | `t` | cycle theme: dark, light, nord, mono |
+| `y` | cycle style: plain, minimal, powerline, capsule |
+| `i` | Nerd Font icons on or off |
 | `r` | one row or two |
 | `s` | write to your user config or this project's |
 | `enter` | save, install, show the result |
@@ -96,6 +98,8 @@ clawline --toggle git             # on if off, off if on
 clawline --on burn --off cost     # explicit
 clawline --row tips 1             # move a segment to row 1
 clawline --theme nord             # dark, light, nord, mono
+clawline --style minimal          # plain, minimal, powerline, capsule
+clawline --icons nerd             # needs a Nerd Font
 clawline --set context.width=14   # any option from --show
 ```
 
@@ -158,9 +162,55 @@ terminal or shell instead, where a real keybinding is possible. Windows Terminal
 | `version` | Claude Code version | — |
 | `custom` | first line of any shell command, cached | your command |
 | `text` | a fixed label of your own | — |
+| `fill` | nothing; pushes the segments after it to the right edge | — |
 
 On by default: `model`, `mode`, `dir`, `git` on row 1; `context`, `rate-5h`, `rate-week`, `cost`,
 `tips` on row 2.
+
+## Styles
+
+The default look is `plain`, the one above. Three more are opt-in, and none of them change a
+colour you already have:
+
+```bash
+clawline --style minimal     # thin │ rules between segments
+clawline --style powerline   # solid blocks joined by arrows
+clawline --style capsule     # each segment in its own rounded pill
+clawline --icons nerd        # an icon ahead of every segment
+```
+
+Powerline, capsule and the icons draw glyphs that only a [Nerd Font](https://www.nerdfonts.com)
+has. Without one you get boxes, so `plain` and `minimal` stay the safe pair. With the `mono` theme,
+powerline and capsule draw their blocks in reverse video.
+
+Two more pieces work in any style:
+
+- **`fill`** is a segment that draws nothing and pushes everything after it to the right edge, so a
+  row can read `model mode dir git ⟶ cost burn cache`.
+- **`glyphs: "smooth"`** on `context`, `rate-5h` or `rate-week` draws the bar in eighth blocks over
+  a track, so 38% of ten cells is three and a sliver instead of four.
+
+Putting it together:
+
+```json
+{
+  "style": "minimal",
+  "icons": "nerd",
+  "rows": [
+    ["model", "mode", "dir", "git", "fill", "cost", "burn", "cache"],
+    ["context", "tips", "fill", "rate-5h", "rate-week"]
+  ],
+  "segments": {
+    "context": { "glyphs": "smooth", "width": 16 },
+    "rate-5h": { "bar": true, "glyphs": "smooth", "width": 8 },
+    "rate-week": { "bar": true, "glyphs": "smooth", "width": 8 }
+  }
+}
+```
+
+Right-aligned segments sit where Claude Code puts its own notifications outside
+[fullscreen](https://code.claude.com/docs/en/fullscreen), so a notification can cover them while it
+is up.
 
 ## Config
 
@@ -189,7 +239,7 @@ never breaks the line.
 
 Per-segment options worth knowing:
 
-- `context`: `bar`, `width`, `glyphs` (`blocks`, `bars`, `dots`, `ascii`), `showPercent`,
+- `context`: `bar`, `width`, `glyphs` (`blocks`, `bars`, `dots`, `ascii`, `smooth`), `showPercent`,
   `showTokens`, `warnAt`, and `label` for a prefix such as `ctx` ahead of the bar
 - `rate-5h` and `rate-week`: `bar`, `width`, `glyphs`, `showReset`, and `includeSpendLimit` on the
   weekly one. The bar is off by default on both — put it wherever you want it, or nowhere:
@@ -228,6 +278,8 @@ clawline --project    # act on ./.claude/settings.json and ./.clawline.json
 clawline --toggle <id> | --on <id> | --off <id>
 clawline --row <id> <1-4>
 clawline --theme dark|light|nord|mono
+clawline --style plain|minimal|powerline|capsule
+clawline --icons none|nerd
 clawline --set <id>.<option>=<value>
 ```
 
@@ -241,6 +293,9 @@ Claude Code sets it for you.
 - **Context percentage** is input-only (`input + cache_creation + cache_read`), matching how Claude
   Code computes its own `used_percentage`. It reads `—` before the first call and right after
   `/compact`, because there is genuinely no number yet.
+- **Narrow terminals:** when a row does not fit, the least important segment gives way first. One
+  whose front carries the meaning (the mode, a path, a tip) is shortened while enough of it
+  survives to read; one that carries a number is dropped whole, because `cache …` says nothing.
 - **Windows:** Claude Code runs the status line through Git Bash when it is installed, and Git Bash
   eats unquoted backslashes in the command path. The installer always writes forward slashes.
   `--doctor` fails loudly if it ever finds a backslash in there.
