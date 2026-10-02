@@ -26,7 +26,9 @@ function write(sessionId, value) {
 // spend falls back to the session totals, which are always available.
 export function rates(sessionId, { tokens = 0, costUsd = 0, durationMs = 0 } = {}) {
   const now = Date.now();
-  const prev = read(sessionId);
+  let prev = read(sessionId);
+  // A sample from the future would freeze the rate until the clock caught up with it.
+  if (prev && !(prev.at <= now)) prev = null;
   let tokensPerMin = prev?.rate?.tokensPerMin ?? null;
 
   if (prev && now - prev.at >= MIN_GAP_MS) {
