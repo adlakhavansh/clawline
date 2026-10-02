@@ -1,0 +1,15 @@
+{
+  "cwd": "C:/Users/adlak/claude_projects/clawline",
+  "session_id": "compact-0002",
+  "transcript_path": "test/fixtures/transcript-auto.jsonl",
+  "model": { "id": "claude-opus-5", "display_name": "Opus" },
+  "workspace": { "current_dir": "C:/Users/adlak/claude_projects/clawline", "project_dir": "C:/Users/adlak/claude_projects", "added_dirs": [] },
+  "version": "2.1.260",
+  "output_style": { "name": "default" },
+  "cost": { "total_cost_usd": 4.5, "total_duration_ms": 7200000, "total_api_duration_ms": 1800000, "total_lines_added": 820, "total_lines_removed": 410 },
+  "context_window": { "total_input_tokens": 0, "total_output_tokens": 0, "context_window_size": 200000, "used_percentage": null, "remaining_percentage": null, "current_usage": null },
+  "exceeds_200k_tokens": false,
+  "prompt_cache": { "warm": false, "caching_observed": true, "ttl": "1h", "requests": 40, "misses": 3, "hit_ratio": 0.42, "last_miss_cause": { "causes": ["tools_changed"] } },
+  "effort": { "level": "high" },
+  "rate_limits": { "five_hour": { "used_percentage": 88, "resets_at": 9999999999 }, "seven_day": { "used_percentage": 91.4, "resets_at": 9999999999 }, "spend_limit": { "used_percentage": 62.8, "resets_at": 9999999999 } }
+}

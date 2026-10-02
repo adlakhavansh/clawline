@@ -1,0 +1,19 @@
+{
+  "cwd": "C:/Users/adlak/claude_projects/clawline",
+  "session_id": "big-0003",
+  "transcript_path": "test/fixtures/transcript-bypass.jsonl",
+  "model": { "id": "claude-sonnet-5", "display_name": "Sonnet" },
+  "workspace": { "current_dir": "C:/Users/adlak/claude_projects/clawline", "project_dir": "C:/Users/adlak/claude_projects/clawline", "added_dirs": [], "git_worktree": "feature-xyz" },
+  "version": "2.1.260",
+  "output_style": { "name": "explanatory" },
+  "cost": { "total_cost_usd": 24.9, "total_duration_ms": 12600000, "total_api_duration_ms": 3600000, "total_lines_added": 2400, "total_lines_removed": 900 },
+  "context_window": { "total_input_tokens": 930000, "total_output_tokens": 8000, "context_window_size": 1000000, "used_percentage": 93, "remaining_percentage": 7, "current_usage": { "input_tokens": 12000, "output_tokens": 8000, "cache_creation_input_tokens": 18000, "cache_read_input_tokens": 900000 } },
+  "exceeds_200k_tokens": true,
+  "prompt_cache": { "warm": true, "caching_observed": true, "ttl": "5m", "requests": 120, "misses": 1, "hit_ratio": 0.97 },
+  "fast_mode": true,
+  "effort": { "level": "low" },
+  "pr": { "number": 1234, "url": "https://github.com/adlakhavansh/clawline/pull/1234", "review_state": "changes_requested" },
+  "rate_limits": { "five_hour": { "used_percentage": 97, "resets_at": 9999999999 }, "seven_day": { "used_percentage": 55, "resets_at": 9999999999 } },
+  "vim": { "mode": "NORMAL" },
+  "agent": { "name": "security-reviewer" }
+}

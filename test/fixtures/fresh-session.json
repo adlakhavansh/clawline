@@ -1,0 +1,13 @@
+{
+  "cwd": "C:/Users/adlak/claude_projects/clawline",
+  "session_id": "fresh-0001",
+  "transcript_path": "test/fixtures/does-not-exist.jsonl",
+  "model": { "id": "claude-sonnet-5", "display_name": "Sonnet" },
+  "workspace": { "current_dir": "C:/Users/adlak/claude_projects/clawline", "project_dir": "C:/Users/adlak/claude_projects/clawline", "added_dirs": [] },
+  "version": "2.1.260",
+  "output_style": { "name": "default" },
+  "cost": { "total_cost_usd": 0, "total_duration_ms": 0, "total_api_duration_ms": 0, "total_lines_added": 0, "total_lines_removed": 0 },
+  "context_window": { "total_input_tokens": 0, "total_output_tokens": 0, "context_window_size": 200000, "used_percentage": null, "remaining_percentage": null, "current_usage": null },
+  "exceeds_200k_tokens": false,
+  "fast_mode": false
+}

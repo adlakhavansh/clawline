@@ -1,0 +1,44 @@
+{
+  "cwd": "C:/Users/adlak/claude_projects/clawline",
+  "session_id": "db6da849-95e4-4085-82ed-47a1011bcb4e",
+  "session_name": "statusline-build",
+  "prompt_id": "550e8400-e29b-41d4-a716-446655440000",
+  "transcript_path": "test/fixtures/transcript-plan.jsonl",
+  "model": { "id": "claude-opus-5", "display_name": "Opus" },
+  "workspace": {
+    "current_dir": "C:/Users/adlak/claude_projects/clawline",
+    "project_dir": "C:/Users/adlak/claude_projects/clawline",
+    "added_dirs": []
+  },
+  "version": "2.1.260",
+  "output_style": { "name": "default" },
+  "cost": {
+    "total_cost_usd": 1.234,
+    "total_duration_ms": 3785000,
+    "total_api_duration_ms": 942000,
+    "total_lines_added": 156,
+    "total_lines_removed": 23
+  },
+  "context_window": {
+    "total_input_tokens": 76500,
+    "total_output_tokens": 1200,
+    "context_window_size": 200000,
+    "used_percentage": 38,
+    "remaining_percentage": 62,
+    "current_usage": {
+      "input_tokens": 8500,
+      "output_tokens": 1200,
+      "cache_creation_input_tokens": 5000,
+      "cache_read_input_tokens": 63000
+    }
+  },
+  "exceeds_200k_tokens": false,
+  "prompt_cache": { "warm": true, "caching_observed": true, "ttl": "1h", "requests": 14, "misses": 2, "hit_ratio": 0.91 },
+  "fast_mode": false,
+  "effort": { "level": "xhigh" },
+  "thinking": { "enabled": true },
+  "rate_limits": {
+    "five_hour": { "used_percentage": 23.5, "resets_at": 9999999999 },
+    "seven_day": { "used_percentage": 41.2, "resets_at": 9999999999 }
+  }
+}
