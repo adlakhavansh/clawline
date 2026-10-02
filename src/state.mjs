@@ -32,7 +32,7 @@ export function rates(sessionId, { tokens = 0, costUsd = 0, durationMs = 0 } = {
   const now = Date.now();
   let prev = read(sessionId);
   // A sample from the future would freeze the rate until the clock caught up with it.
-  if (prev && !(prev.at <= now)) prev = null;
+  if (prev && !(prev.at <= now && Number.isFinite(prev.tokens))) prev = null;
   let tokensPerMin = prev?.rate?.tokensPerMin ?? null;
 
   if (prev && now - prev.at >= MIN_GAP_MS) {
