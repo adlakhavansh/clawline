@@ -1,0 +1,108 @@
+{
+  "rules": [
+    {
+      "id": "context-critical",
+      "when": { "contextPctAtLeast": 90 },
+      "text": "context {ctxPct}% — /compact now or start a fresh session",
+      "role": "crit"
+    },
+    {
+      "id": "context-high",
+      "when": { "contextPctAtLeast": 75 },
+      "text": "context {ctxPct}% — /compact soon, or /clear if this thread is done",
+      "role": "bad"
+    },
+    {
+      "id": "conflicts",
+      "when": { "gitConflicts": true },
+      "text": "merge conflicts unresolved — fix before asking for more edits",
+      "role": "crit"
+    },
+    {
+      "id": "pr-changes",
+      "when": { "prChangesRequested": true },
+      "text": "PR has changes requested — /code-review the diff before pushing again",
+      "role": "bad"
+    },
+    {
+      "id": "rate-5h-high",
+      "when": { "rate5hAtLeast": 85 },
+      "text": "5h limit {rate5h}% — drop /effort or switch model to stretch the window",
+      "role": "bad"
+    },
+    {
+      "id": "rate-week-high",
+      "when": { "rateWeekAtLeast": 85 },
+      "text": "weekly limit {rateWeek}% — save Opus for the hard parts",
+      "role": "bad"
+    },
+    {
+      "id": "cache-cold",
+      "when": { "cacheCold": true },
+      "text": "prompt cache cold — next call re-sends the whole prefix",
+      "role": "warn"
+    },
+    {
+      "id": "cache-poor",
+      "when": { "cacheHitBelow": 50 },
+      "text": "cache hits {cacheHit}% — editing CLAUDE.md or tools mid-session busts the prefix",
+      "role": "warn"
+    },
+    {
+      "id": "dirty-tree",
+      "when": { "gitDirtyAtLeast": 25 },
+      "text": "{dirty} files dirty — commit a checkpoint before the next big change",
+      "role": "warn"
+    },
+    {
+      "id": "unpushed",
+      "when": { "gitAheadAtLeast": 5 },
+      "text": "{ahead} commits unpushed — push before the laptop decides otherwise",
+      "role": "warn"
+    },
+    {
+      "id": "plan-mode",
+      "when": { "modeIs": "plan" },
+      "text": "plan mode — shift+tab twice to execute once the plan reads right",
+      "role": "tip"
+    },
+    {
+      "id": "bypass-mode",
+      "when": { "modeIs": "bypass" },
+      "text": "bypass permissions on — every tool call runs unasked",
+      "role": "crit"
+    },
+    {
+      "id": "spendy",
+      "when": { "costAtLeast": 20 },
+      "text": "session at {cost} — /cost for the breakdown, /clear to reset the context tax",
+      "role": "warn"
+    }
+  ],
+  "tips": [
+    "ctrl+r toggles full tool output",
+    "esc esc rewinds the conversation to an earlier turn",
+    "shift+tab cycles permission modes: default, accept-edits, plan",
+    "/effort max for the gnarly bugs, /effort low for mechanical edits",
+    "/compact with a sentence of guidance keeps what you care about",
+    "# at the start of a message writes it straight to memory",
+    "@ pulls a file into context without a tool call",
+    "/rewind restores files from an earlier checkpoint",
+    "! runs a shell command and drops the output into the thread",
+    "/resume reopens any past session in this directory",
+    "ctrl+b runs the current command in the background",
+    "/agents builds a subagent with its own tools and model",
+    "/hooks fires your own scripts before and after tool calls",
+    "/statusline rewrites this very line by describing what you want",
+    "/add-dir gives Claude a second directory to read",
+    "/mcp lists connected servers and their auth state",
+    "/export dumps the transcript to a file or clipboard",
+    "/privacy-settings controls what gets used for training",
+    "claude -p \"...\" runs one prompt headless and exits",
+    "claude --continue picks up the last session from your shell",
+    "CLAUDE.md in a subdirectory only loads when files there are touched",
+    "/doctor checks your install when something behaves oddly",
+    "a plan approved in plan mode survives /clear if you save it first",
+    "/vim turns on modal editing in the prompt"
+  ]
+}
