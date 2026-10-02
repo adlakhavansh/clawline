@@ -96,9 +96,17 @@ clawline --set context.width=14   # any option from --show
 
 ### Inside Claude Code
 
-Claude Code keybindings map to its own actions (`chat:cycleMode`, `app:toggleTodos`, …) and cannot
-run a shell command, so no keypress can open the picker. Use the bundled slash command instead —
-copy `commands/clawline.md` into `~/.claude/commands/` and then type what you want:
+Two ways, because Claude Code keybindings map to its own actions (`chat:cycleMode`,
+`app:toggleTodos`, …) and cannot run a shell command, so no keypress can open the terminal picker.
+
+**The pane.** `plugin/clawline-pane` is a Claude Code plugin that draws the same checkbox list in a
+pane, inside the session. Load it with `claude --plugin-dir <path to>/clawline/plugin`, then run
+`/clawline-pane`. Every segment is a row; pressing one cycles it off, row 1, row 2; the theme
+button cycles themes; reload re-reads the config. It shells out to this CLI, so the config file
+stays the single source of truth.
+
+**The slash command.** Copy `commands/clawline.md` into `~/.claude/commands/` and type what you
+want:
 
 ```
 /clawline                      show the current config
