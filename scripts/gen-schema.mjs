@@ -29,6 +29,11 @@ const schema = {
     theme: { type: "string", enum: THEME_NAMES, default: "dark" },
     separator: { type: "string", default: "  ", description: "text between segments" },
     padding: { type: "integer", minimum: 0, default: 0 },
+    allowProjectCommands: {
+      type: "boolean",
+      default: false,
+      description: "let a project's .clawline.json set custom.command; only read from your user config",
+    },
     rows: {
       type: "array",
       description: "each row is an ordered list of segment ids; a segment not listed is off",

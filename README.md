@@ -206,8 +206,11 @@ Per-segment options worth knowing:
 - `custom`: `command`, `ttl` seconds, `label`, `maxWidth`
 - `duration`: `showApiShare`
 
-`custom.command` runs through a shell, by design, so pipes and globs work. It is your own config
-file; nothing from the session payload is ever interpolated into it.
+`custom.command` runs through a shell, by design, so pipes and globs work. Nothing from the session
+payload is ever interpolated into it. Because it runs on every render, only your own
+`~/.claude/clawline.json` may set it: a project's `.clawline.json` comes with whatever repo you
+clone, so a command there is ignored with a warning in `--doctor`, unless your user config says
+`"allowProjectCommands": true`.
 
 ## CLI
 
