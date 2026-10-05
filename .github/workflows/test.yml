@@ -1,0 +1,45 @@
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    # clawline claims engines >=18 and has Windows-specific paths (forward slashes
+    # for Git Bash in the installer, temp-dir state files). Both claims are only
+    # worth as much as the matrix that checks them.
+    name: node ${{ matrix.node }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node: ['18', '20', '22', '24']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      # No install step: clawline has zero runtime and dev dependencies.
+      - name: Test
+        run: node --test
+
+      - name: Status line renders
+        shell: bash
+        run: node bin/clawline.mjs --render < test/fixtures/mid-session.json
+
+      # Once is enough: the schema does not vary by platform, and a Windows
+      # checkout rewrites line endings, which would fail the diff on its own.
+      - name: Generated schema is current
+        if: matrix.os == 'ubuntu-latest' && matrix.node == '20'
+        shell: bash
+        run: |
+          node scripts/gen-schema.mjs
+          git diff --exit-code schema.json \
+            || { echo "schema.json is stale - run node scripts/gen-schema.mjs and commit"; exit 1; }
