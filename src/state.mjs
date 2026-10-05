@@ -35,12 +35,18 @@ export function rates(sessionId, { tokens = 0, costUsd = 0, durationMs = 0 } = {
   if (prev && !(prev.at <= now && Number.isFinite(prev.tokens))) prev = null;
   let tokensPerMin = prev?.rate?.tokensPerMin ?? null;
 
-  if (prev && now - prev.at >= MIN_GAP_MS) {
+  // An unknown count is not a sample. Recording it as one would measure the
+  // whole context as a drop to zero, and that rate is then written to state and
+  // read back on every later render.
+  const known = Number.isFinite(tokens);
+  const due = !prev || now - prev.at >= MIN_GAP_MS;
+
+  if (known && prev && now - prev.at >= MIN_GAP_MS) {
     const minutes = (now - prev.at) / 60000;
     if (minutes > 0) tokensPerMin = Math.round((tokens - prev.tokens) / minutes);
   }
 
-  if (!prev || now - prev.at >= MIN_GAP_MS) {
+  if (known && due) {
     write(sessionId, { at: now, tokens, costUsd, rate: { tokensPerMin } });
   }
 

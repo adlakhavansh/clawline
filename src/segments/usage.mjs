@@ -220,7 +220,9 @@ export const burn = {
   render({ data, cfg, theme }) {
     const { used } = contextUsage(data);
     const r = rates(data.session_id, {
-      tokens: used || 0,
+      // `used` is null when the payload carries a percentage but no token count.
+      // Passing 0 for it would be a measurement of zero, not a missing one.
+      tokens: used,
       costUsd: data.cost?.total_cost_usd || 0,
       durationMs: data.cost?.total_duration_ms || 0,
     });

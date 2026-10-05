@@ -385,6 +385,30 @@ test("a custom command cached in the future runs again", async () => {
   assert.equal(run(), "after");
 });
 
+test("an unknown token count does not poison the rate", async () => {
+  const { rates } = await import("../src/state.mjs");
+  const id = `unknown-${process.pid}-${Date.now()}`;
+  const real = Date.now;
+  const now = real();
+  try {
+    rates(id, { tokens: 100_000 });
+    // A payload that carries a percentage but no token count: the measurement is
+    // unknown, not zero. Treating it as zero invents a huge negative rate and
+    // writes it to state, where it is read back for every later render.
+    Date.now = () => now + 10_000;
+    assert.ok(
+      (rates(id, { tokens: null }).tokensPerMin ?? 0) >= 0,
+      "an unknown count must not produce a negative rate",
+    );
+    // The next real sample must measure against the last real one, not against zero.
+    // Measured against the last real sample at t=0, not against the unknown one.
+    Date.now = () => now + 60_000;
+    assert.equal(rates(id, { tokens: 106_000 }).tokensPerMin, 6000);
+  } finally {
+    Date.now = real;
+  }
+});
+
 test("a rate sample from the future does not freeze the rate", async () => {
   const { rates } = await import("../src/state.mjs");
   const id = `future-${process.pid}-${Date.now()}`;
